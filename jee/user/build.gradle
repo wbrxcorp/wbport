@@ -1,0 +1,43 @@
+apply plugin: 'scala'
+apply plugin: 'war'
+
+defaultTasks 'clean','war'
+
+repositories {
+    mavenCentral()
+}
+
+version = '0.20141113'
+
+sourceSets {
+    main.scala.srcDirs = ['../src']
+    main.resources.srcDirs = main.scala.srcDirs
+}
+
+sourceCompatibility = 1.7
+compileScala.options.encoding = 'UTF-8'
+
+war.archiveName = 'user.war'
+webAppDirName = 'webapp'
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.11.3'
+    compile 'org.springframework:spring-webmvc:4.1.1.RELEASE'
+    compile 'org.springframework:spring-tx:4.1.1.RELEASE'
+    compile 'org.springframework:spring-jdbc:4.1.1.RELEASE'
+    compile 'org.springframework:spring-context-support:4.1.1.RELEASE'
+    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.11:2.4.2'
+    compile 'org.scalikejdbc:scalikejdbc_2.11:2.1.2'
+    compile ('com.yahoo.platform.yui:yuicompressor:2.4.7') {
+        exclude module: 'js'
+    }
+
+    providedCompile 'javax.servlet:servlet-api:2.5'
+    providedCompile 'javax.mail:mail:1.4.7'
+
+    runtime 'org.jsoup:jsoup:1.8.1'
+    runtime 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.4.3'
+    runtime 'org.springframework:spring-aop:4.1.1.RELEASE'
+    runtime 'org.aspectj:aspectjweaver:1.8.2'
+    runtime 'org.jsoup:jsoup:1.8.1'
+}

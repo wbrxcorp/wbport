@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>Default settings</comment>
+    <entry key="mailtrap_id">YOUR_MAILTRAP_ID</entry>
+    <entry key="mailtrap_password">YOUR_MAILTRAP_PASSWORD</entry>
+</properties>

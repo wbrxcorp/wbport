@@ -1,0 +1,7 @@
+*~
+workspace.xml
+.gradle
+build
+out
+settings-*.xml
+
