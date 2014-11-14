@@ -9,7 +9,7 @@ import scalikejdbc.{WrappedResultSet, _}
 
 case class User(id:Int, email:String)
 case class Server(id:Int, fqdn:String)
-case class Domain(domainName:String)
+case class Domain(domain:String)
 
 /**
  * Created by shimarin on 14/11/12.
@@ -107,7 +107,7 @@ trait DAO extends ScalikeJdbcSupport {
     db(implicit session=>sql"delete from servers where user_id=${userId} and fqdn=${fqdn}".update().apply()) > 0
   }
 
-  def getDomains(userId:Int):Seq[Domain] = {
-    db(implicit session=>sql"select * from domains where user_id=${userId}".map{ row => Domain(row.string("domain_name"))}.list().apply())
+  def getDomains(userId:Int):Seq[String] = {
+    db(implicit session=>sql"select * from domains where user_id=${userId}".map(_.string("domain_name")).list().apply())
   }
 }

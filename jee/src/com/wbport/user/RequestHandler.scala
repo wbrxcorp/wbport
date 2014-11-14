@@ -93,7 +93,7 @@ class RequestHandler extends DAO with Authentication with EmailSupport {
 
   @RequestMapping(value=Array("domain"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def domain():Seq[Domain] = {
+  def domain():Seq[String] = {
     getDomains(getUser().id)
   }
 

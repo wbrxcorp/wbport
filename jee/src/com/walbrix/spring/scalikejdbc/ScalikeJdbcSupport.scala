@@ -14,12 +14,10 @@ import scalikejdbc.DBSession
 class TransactionAwareDBSession(private val dataSource:DataSource,
                                 override val isReadOnly:Boolean = false) extends scalikejdbc.DBSession {
   override val conn:Connection = {
-    println("get")
     DataSourceUtils.getConnection(dataSource)
   }
   override def close(): Unit = {
     util.control.Exception.ignoring(classOf[Throwable]) {
-      println("release")
       DataSourceUtils.releaseConnection(conn, dataSource)
     }
   }
