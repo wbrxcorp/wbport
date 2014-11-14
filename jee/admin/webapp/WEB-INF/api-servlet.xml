@@ -21,7 +21,11 @@
     <aop:config proxy-target-class="true"/>
     <tx:annotation-driven/>
 
-    <mvc:annotation-driven>
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="favorPathExtension" value="false" />
+    </bean>
+
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:message-converters register-defaults="false">
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                 <property name="objectMapper">
