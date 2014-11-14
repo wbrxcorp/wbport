@@ -5,6 +5,7 @@ import javax.sql.DataSource
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.datasource.DataSourceUtils
+import scalikejdbc.DBSession
 
 /**
  * Created by shimarin on 14/11/02.
@@ -12,9 +13,13 @@ import org.springframework.jdbc.datasource.DataSourceUtils
 
 class TransactionAwareDBSession(private val dataSource:DataSource,
                                 override val isReadOnly:Boolean = false) extends scalikejdbc.DBSession {
-  override val conn:Connection = DataSourceUtils.getConnection(dataSource)
+  override val conn:Connection = {
+    println("get")
+    DataSourceUtils.getConnection(dataSource)
+  }
   override def close(): Unit = {
     util.control.Exception.ignoring(classOf[Throwable]) {
+      println("release")
       DataSourceUtils.releaseConnection(conn, dataSource)
     }
   }
@@ -22,6 +27,9 @@ class TransactionAwareDBSession(private val dataSource:DataSource,
 
 trait ScalikeJdbcSupport {
   @Autowired private var dataSource:DataSource = _
-  implicit def __scalikejdbc_session = new TransactionAwareDBSession(dataSource, false)
-  def readOnlySession = new TransactionAwareDBSession(dataSource, true)
+  def db[T](f:DBSession=>T):T = {
+    scalikejdbc.using(new TransactionAwareDBSession(dataSource)) { session =>
+      f(session)
+    }
+  }
 }

@@ -19,7 +19,7 @@ class RequestHandler extends ScalikeJdbcSupport {
   @ResponseBody
   def dump(@RequestBody json:Map[String,AnyRef]):(Boolean, Option[String]) = {
     val dumpFile = json.get("file").getOrElse(defaultDumpFile)
-    val rst = sql"script to ${dumpFile}".execute().apply()
+    val rst = db(implicit session=>sql"script to ${dumpFile}".execute().apply())
     (rst, None)
   }
 
@@ -27,7 +27,7 @@ class RequestHandler extends ScalikeJdbcSupport {
   @ResponseBody
   def dump():(Boolean, Option[String]) = {
     val dumpFile = defaultDumpFile
-    val rst = sql"script to ${dumpFile}".execute().apply()
+    val rst = db(implicit session=>sql"script to ${dumpFile}".execute().apply())
     (rst, None)
   }
 

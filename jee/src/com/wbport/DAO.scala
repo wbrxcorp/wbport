@@ -21,27 +21,27 @@ trait DAO extends ScalikeJdbcSupport {
   }
 
   def getUser(userId:Int):Option[User] = {
-    sql"select * from users where id=${userId}".map(row2user(_)).single().apply()
+    db(implicit session => sql"select * from users where id=${userId}".map(row2user(_)).single().apply())
   }
 
   def getUser(username:String):Option[User] = {
-    sql"select * from users where email=${username}".map(row2user(_)).single().apply()
+    db(implicit session => sql"select * from users where email=${username}".map(row2user(_)).single().apply())
   }
 
   def getUserHasPassword(username:String):Option[User] = {
-    sql"select * from users where email=${username} and password is not null".map(row2user(_)).single().apply()
+    db(implicit session => sql"select * from users where email=${username} and password is not null".map(row2user(_)).single().apply())
   }
 
   def getUserByAuthToken(authToken:String):Option[User] = {
-    sql"select * from users where auth_token=${authToken}".map(row2user(_)).single().apply()
+    db(implicit session => sql"select * from users where auth_token=${authToken}".map(row2user(_)).single().apply())
   }
 
   def getUserHasNoPasswordByAuthToken(authToken:String):Option[User] = {
-    sql"select * from users where auth_token=${authToken} and password is null".map(row2user(_)).single().apply()
+    db(implicit session => sql"select * from users where auth_token=${authToken} and password is null".map(row2user(_)).single().apply())
   }
 
   def checkPassword(username:String,password:String):Option[(Int,String)] = {
-    val (userId,encrypted, authToken) = sql"select id,password,auth_token from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3))).single().apply().getOrElse(return None)
+    val (userId,encrypted, authToken) = db(implicit session => sql"select id,password,auth_token from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3))).single().apply()).getOrElse(return None)
     comparePassword(encrypted, password) match {
       case true => Some((userId,authToken))
       case false => None
@@ -75,9 +75,9 @@ trait DAO extends ScalikeJdbcSupport {
   }
 
   def resetAuthToken(userId:Int):Option[String] = {
-    sql"select email from users where id=${userId}".map(_.string(1)).single().apply().map { email =>
+    db(implicit session=>sql"select email from users where id=${userId}".map(_.string(1)).single().apply()).map { email =>
       val authToken = generateAuthToken(email)
-      sql"update users set auth_token=${authToken},auth_token_expires_at=DATEADD('MONTH', 6, now()) where id=${userId}".update().apply()
+      db(implicit session=>sql"update users set auth_token=${authToken},auth_token_expires_at=DATEADD('MONTH', 6, now()) where id=${userId}".update().apply())
       authToken
     }
   }
@@ -87,13 +87,15 @@ trait DAO extends ScalikeJdbcSupport {
   }
 
   def getServers(userId:Int):Seq[Server] = {
-    sql"select * from servers where user_id=${userId}".map(row2server(_)).list().apply()
+    db(implicit session=>sql"select * from servers where user_id=${userId}".map(row2server(_)).list().apply())
   }
 
   def createServer(userId:Int, fqdn:String):Option[Int] = {
     try {
-      sql"insert into servers(fqdn,user_id) values(${fqdn},${userId})".update().apply()
-      sql"select last_insert_id()".map(_.int(1)).single().apply()
+      db { implicit session =>
+        sql"insert into servers(fqdn,user_id) values(${fqdn},${userId})".update().apply()
+        sql"select last_insert_id()".map(_.int(1)).single().apply()
+      }
     }
     catch {
       case e:SQLException if e.getErrorCode == 23505/*DUPLICATE_KEY_1*/ =>
@@ -102,10 +104,10 @@ trait DAO extends ScalikeJdbcSupport {
   }
 
   def deleteServer(userId:Int, fqdn:String):Boolean = {
-    sql"delete from servers where user_id=${userId} and fqdn=${fqdn}".update().apply() > 0
+    db(implicit session=>sql"delete from servers where user_id=${userId} and fqdn=${fqdn}".update().apply()) > 0
   }
 
   def getDomains(userId:Int):Seq[Domain] = {
-    sql"select * from domains where user_id=${userId}".map{ row => Domain(row.string("domain_name"))}.list().apply()
+    db(implicit session=>sql"select * from domains where user_id=${userId}".map{ row => Domain(row.string("domain_name"))}.list().apply())
   }
 }

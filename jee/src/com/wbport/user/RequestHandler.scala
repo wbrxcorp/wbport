@@ -43,7 +43,7 @@ class RequestHandler extends DAO with Authentication with EmailSupport {
       case Some(user) => Result(false, Some("ALREADYEXISTS"))
       case None =>
         val authToken = generateAuthToken(email)
-        val rst = sql"merge into users(email,auth_token,auth_token_expires_at) key(email) values(${email},${authToken},DATEADD('DAY', 1, now()))".update().apply()
+        val rst = db(implicit session=>sql"merge into users(email,auth_token,auth_token_expires_at) key(email) values(${email},${authToken},DATEADD('DAY', 1, now()))".update().apply())
         val sender = createMailSender()
         val message = sender.createJisMailMessage
         message.setFrom("support@wbport.com")
