@@ -49,7 +49,7 @@ trait Authentication extends DAO with HttpErrorStatus {
   }
 
   def getAuthToken():Option[String] = {
-    Option(request.getCookies).map(_.find(_.getName.equals(authTokenCookieName)).map(_.getValue)).get
+    Option(request.getCookies).flatMap(_.find(_.getName.equals(authTokenCookieName)).map(_.getValue))
   }
 
   def getUserOpt():Option[User] = {
