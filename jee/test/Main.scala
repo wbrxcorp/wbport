@@ -1,9 +1,11 @@
 import java.awt.Desktop
+import java.util.concurrent.TimeUnit
 
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.HandlerList
 import org.eclipse.jetty.webapp.WebAppContext
+import org.openqa.selenium.chrome.ChromeDriver
 
 /**
  * Created by shimarin on 14/11/12.
@@ -35,13 +37,16 @@ object Main {
     System.setProperty("spring.profiles.default", "dev")
     System.setProperty("java.util.logging.config.file", "logging.properties")
     val (server, port) = run()
+
+    System.setProperty("webdriver.chrome.driver", System.getProperty("os.name") match {
+      case x if x.startsWith("Windows") => "test/chromedriver.exe"
+      case x if x.startsWith("Mac") => "test/chromedriver-mac"
+      case x if x.startsWith("Linux") => "test/chromedriver-linux"
+      case _ => "test/chromedriver"
+    })
+    val driver = new ChromeDriver()
+    driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
     val url = "http://localhost:%d/".format(port)
-    println(url)
-    if (Desktop.isDesktopSupported) {
-      val desktop = Desktop.getDesktop
-      if (desktop.isSupported(Desktop.Action.BROWSE)) {
-        desktop.browse(new java.net.URI(url));
-      }
-    }
+    driver.get(url)
   }
 }
