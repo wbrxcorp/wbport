@@ -20,6 +20,7 @@ case class BulkMail(
   subject:String,
   body:String,
   from:String,
+  fromName:Option[String],
   recipients:Seq[Recipient]
 )
 
@@ -60,7 +61,10 @@ class RequestHandler extends ScalikeJdbcSupport with EmailSupport {
     val sender = createMailSender()
     json.recipients.foreach { recipient =>
       val message = sender.createJisMailMessage
-      message.setFrom(json.from)
+      json.fromName match {
+        case Some(fromName) => message.setFrom(json.from, fromName)
+        case _ => message.setFrom(json.from)
+      }
       message.setTo(recipient.email)
       val variables = recipient.variables.getOrElse(Map())
       message.setSubject(applyVariables(json.subject, variables))
