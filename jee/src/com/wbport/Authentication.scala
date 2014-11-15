@@ -17,7 +17,7 @@ trait Authentication extends DAO with HttpErrorStatus {
   @Autowired private var request:HttpServletRequest = _
   @Autowired private var response:HttpServletResponse = _
 
-  private def sendCredentials(userId:Int, authToken:String):Unit = {
+  private def sendCredentials(userId:Int, authToken:String, admin:Boolean):Unit = {
     val session = request.getSession()
     session.invalidate()
     val cookie: Cookie = new Cookie(authTokenCookieName, authToken)
@@ -29,15 +29,15 @@ trait Authentication extends DAO with HttpErrorStatus {
   }
 
   def login(username:String, password:String):Boolean = {
-    checkPassword(username, password).map { case (userId,authToken) =>
-      sendCredentials(userId, authToken)
+    checkPassword(username, password).map { case (userId,authToken,admin) =>
+      sendCredentials(userId, authToken, admin)
       true
     }.getOrElse(false)
   }
 
   def loginWithFreshAuthToken(userId:Int):Boolean = {
     resetAuthToken(userId).map { authToken =>
-      sendCredentials(userId, authToken)
+      sendCredentials(userId, authToken,false/*サインアップしたばかりの人はadminではないだろう*/)
       true
     }.getOrElse(false)
   }
@@ -46,6 +46,10 @@ trait Authentication extends DAO with HttpErrorStatus {
     resetAuthToken(getUser().id)
     request.getSession().invalidate()
     true
+  }
+
+  def getAuthToken():Option[String] = {
+    Option(request.getCookies).map(_.find(_.getName.equals(authTokenCookieName)).map(_.getValue)).get
   }
 
   def getUserOpt():Option[User] = {
@@ -59,20 +63,17 @@ trait Authentication extends DAO with HttpErrorStatus {
         return Some(user)
       }
     }
-    Option(request.getCookies).foreach { cookies =>
-      cookies.find(_.getName.equals(authTokenCookieName)).foreach { cookie =>
-        getUserByAuthToken(cookie.getValue).foreach { user =>
-          request.setAttribute(userRequestAttrKey, user)
-          session.setAttribute(userIdSessionAttrKey, user.id: Integer)
-          return Some(user)
-        }
+    getAuthToken.foreach { authToken =>
+      getUserByAuthToken(authToken).foreach { user =>
+        request.setAttribute(userRequestAttrKey, user)
+        session.setAttribute(userIdSessionAttrKey, user.id  )
+        return Some(user)
       }
     }
     None
   }
 
   def getUser():User = getUserOpt().getOrElse(raiseForbidden)
-
 }
 
 class AuthenticationBean extends Authentication {

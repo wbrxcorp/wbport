@@ -7,7 +7,7 @@ import com.walbrix.spring.scalikejdbc.ScalikeJdbcSupport
 import org.springframework.stereotype.Component
 import scalikejdbc.{WrappedResultSet, _}
 
-case class User(id:Int, email:String)
+case class User(id:Int, email:String, admin:Boolean)
 case class Server(id:Int, fqdn:String)
 case class Domain(domain:String)
 
@@ -17,7 +17,7 @@ case class Domain(domain:String)
 @Component
 trait DAO extends ScalikeJdbcSupport {
   private def row2user(row:WrappedResultSet):User = {
-    User(row.int("id"),row.string("email"))
+    User(row.int("id"),row.string("email"), row.boolean("admin_user"))
   }
 
   def getUser(userId:Int):Option[User] = {
@@ -40,10 +40,10 @@ trait DAO extends ScalikeJdbcSupport {
     db(implicit session => sql"select * from users where auth_token=${authToken} and password is null".map(row2user(_)).single().apply())
   }
 
-  def checkPassword(username:String,password:String):Option[(Int,String)] = {
-    val (userId,encrypted, authToken) = db(implicit session => sql"select id,password,auth_token from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3))).single().apply()).getOrElse(return None)
+  def checkPassword(username:String,password:String):Option[(Int,String,Boolean)] = {
+    val (userId,encrypted, authToken,admin) = db(implicit session => sql"select id,password,auth_token,admin_user from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3),row.boolean(4))).single().apply()).getOrElse(return None)
     comparePassword(encrypted, password) match {
-      case true => Some((userId,authToken))
+      case true => Some((userId,authToken,admin))
       case false => None
     }
   }

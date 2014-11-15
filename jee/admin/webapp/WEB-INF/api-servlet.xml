@@ -52,6 +52,7 @@
 
     <beans profile="default">
         <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/wbport"/>
+        <bean class="com.walbrix.spring.JndiMailSenderFactory"/>
     </beans>
 
     <beans profile="dev">
@@ -66,5 +67,11 @@
         </bean>
 
         <jdbc:embedded-database id="dataSource" type="H2"/><!-- will be jdbc:h2:mem:dataSource -->
+        <bean class="com.walbrix.spring.ConfigMailSenderFactory">
+            <property name="host" value="mailtrap.io"/>
+            <property name="port" value="465"/>
+            <property name="username" value="${mailtrap_id}"/>
+            <property name="password" value="${mailtrap_password}"/>
+        </bean>
     </beans>
 </beans>

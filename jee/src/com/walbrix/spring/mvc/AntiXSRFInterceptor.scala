@@ -24,16 +24,14 @@ class AntiXSRFInterceptor extends HandlerInterceptorAdapter {
     if (methodsToBeProtected.contains(request.getMethod)) {
       val tokenHeader = Option(request.getHeader(tokenHeaderName)).orElse(
         request.getContentType() match {
-          case "application/x-www-form-urlencoded" => Some(request.getParameter(tokenCookieName))
+          case "application/x-www-form-urlencoded" => Option(request.getParameter(tokenCookieName))
           case _ => None
         }
       )
       val session = Option(request.getSession(false))
-      if (request.getContentType().equals("application/x-www-form-urlencoded")) {
-
-      }
       return (tokenHeader, session) match {
-        case (Some(header), Some(session)) => header.equals(session.getId())
+        case (Some(header), Some(session)) =>
+          header.equals(session.getId())
         case _ =>
           response.sendError(HttpServletResponse.SC_FORBIDDEN, "Token mismatch")
           false
