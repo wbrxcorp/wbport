@@ -110,4 +110,8 @@ trait DAO extends ScalikeJdbcSupport {
   def getDomains(userId:Int):Seq[String] = {
     db(implicit session=>sql"select * from domains where user_id=${userId}".map(_.string("domain_name")).list().apply())
   }
+
+  def createMailLog(recipient:String, subject:Option[String] = None, success:Boolean = true, errorMessage:Option[String] = None):Unit = db { implicit session =>
+    sql"insert into mail_log(recipient,subject,success,error_message) values(${recipient},${subject},${success},${errorMessage})".update().apply()
+  }
 }
