@@ -19,25 +19,26 @@
 <div class="navbar navbar-inverse navbar-static-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <button type="button" class="navbar-toggle" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
             <a href="/"><span class="navbar-brand">WBPORT.com</span></a>
         </div>
-        <div class="navbar-collapse collapse" ng-show="account.email">
+        <div collapse="navCollapsed" class="navbar-collapse collapse" ng-show="account.email">
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{account.email}} <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle">{{account.email}} <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <!--
                                       <li class="dropdown-header">アカウント</li>
                                       <li><a href="/dashboard/account.html">設定</a></li>
                                       <li><a href="/dashboard/bill.html">利用料金</a></li>
-                                      <li class="divider"></li>
                         -->
                         <li><a href="" ng-click="logout()">ログアウト</a></li>
+                        <li class="divider"></li>
+                        <li><a href="" ng-click="quit()">退会する</a></li>
                     </ul>
                 </li>
             </ul>
@@ -46,6 +47,7 @@
 </div>
 
 <div class="container" style="margin-bottom:2em;">
+    <p ng-show="message">{{message}}</p>
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">

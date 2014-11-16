@@ -1,0 +1,7 @@
+<div class="modal-body">
+    <h3>{{message}}</h3>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-{{{true:'danger',false:'primary'}[!!options.danger]}}" ng-click="$close()">{{{true:'OK',false:'了解'}[!!options.cancel]}}</button>
+    <button ng-show="options.cancel" class="btn btn-default" ng-click="$dismiss()">キャンセル</button>
+</div>

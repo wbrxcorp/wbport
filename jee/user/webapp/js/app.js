@@ -18,14 +18,15 @@ angular.module("WbPort", ["ngResource","ngSanitize","ui.bootstrap"])
             password.save(result, function(result) {
                 modalInstance.close();
                 if (result.success) {
-                    $scope.message = "password changed.";
+                    $scope.message = "パスワードが変更されました";
                     $scope.info = info.get(); // info refresh
+                    $scope.refreshAccount();
                 } else {
                     $scope.message = result.info;
                 }
             }, function() {
                 modalInstance.close();
-                $scope.message = "comm failed";
+                $scope.message = "通信エラー";
             });
         });
     }
@@ -69,12 +70,58 @@ angular.module("WbPort", ["ngResource","ngSanitize","ui.bootstrap"])
         });
     }
 }])
-.run(["$rootScope", "$resource", "$window", function($scope, $resource, $window) {
+.factory("messageBox", ["$rootScope","$modal", function($rootScope, $modal) {
+    return function(message, options, callback, callbackDismiss) {
+       var $scope = $rootScope.$new();
+       $scope.message = message;
+       $scope.options = options;
+       $modal.open(
+           {
+               templateUrl:"messagebox.html",
+               scope: $scope
+           }
+       ).result.then(function (result) {
+           if (typeof callback === "undefined") return;
+           callback(result);
+       }, function() {
+           if (typeof callbackDismiss === "undefined") return;
+           callbackDismiss(result);
+       });
+    }
+}])
+.run(["$rootScope", "$resource", "$window", "$modal", "messageBox", function($scope, $resource, $window, $modal, messageBox) {
     var logout = $resource("./api/logout");
+    var quit = $resource("./api/quit");
     $scope.logout = function() {
         logout.save({}, {}, function(result) {
             $window.location.reload();
         });
     }
-    $scope.account = $resource("./api/info").get();
+    $scope.refreshAccount = function() {
+        $scope.account = $resource("./api/info").get();
+    }
+
+    $scope.refreshAccount();
+
+    $scope.quit = function() {
+        $modal.open({
+            templateUrl:"quit.html",scope:$scope
+        }).result.then(function (password) {
+            var modalInstance = $modal.open({
+                templateUrl:"progress.html",
+                backdrop:"static",keyboard:false
+            });
+            quit.save({password:password}, function(result) {
+                modalInstance.close();
+                if (result.success) {
+                    $window.location.reload();
+                } else {
+                    messageBox("退会に失敗しました:" + result.info, {danger:true});
+                }
+            }, function() {
+                modalInstance.close();
+                messageBox("通信エラー", {danger:true});
+            });
+        });
+    }
 }])

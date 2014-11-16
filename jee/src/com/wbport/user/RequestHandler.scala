@@ -12,6 +12,7 @@ import scalikejdbc._
 
 case class Auth(email:String,password:String)
 case class ChangePassword(password:Option[String],newPassword:String)
+case class Quit(password:Option[String])
 
 /**
  * Created by shimarin on 14/11/12.
@@ -122,4 +123,21 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
     }
   }
 
+  @RequestMapping(value=Array("quit"), method = Array(RequestMethod.POST))
+  @ResponseBody
+  def quit(@RequestBody json:Quit):Result[String] = {
+    val user = getUser()
+    if (user.passwordPresent) {
+      if (!json.password.map(checkPassword(user.email, _) != None).getOrElse(false))
+        return Result.fail("INVALIDPASSWORD")
+    }
+    update(sql"delete from domains where user_id=${user.id}")
+    update(sql"delete from servers where user_id=${user.id}")
+    update(sql"delete from users where id=${user.id}")  match {
+      case rst if rst > 0 =>
+        logout()
+        Result.success
+      case _ => Result.fail("DELETEFAIL")
+    }
+  }
 }
