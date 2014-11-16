@@ -1,72 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja" ng-app="WbPort">
-<head>
-    <meta charset="UTF-8">
-    <title>WBPORT.com</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.css">
-    <link rel="stylesheet" href="./css/style.css">
-
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-resource.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-sanitize.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-i18n/1.2.10/angular-locale_ja-jp.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.11.2/ui-bootstrap-tpls.js"></script>
-    <script src="./js/app.js"></script>
-</head>
-<body class="page page-index-static">
-
-<div class="navbar navbar-inverse navbar-static-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a href="/"><span class="navbar-brand">WBPORT.com</span></a>
-        </div>
+<form name="loginForm" class="form-login form-wrapper form-narrow">
+    <h3 class="title-divider"><span>サインアップ（ユーザー登録）</span></h3>
+    <div class="form-group">
+        <label for="login-email-page">メールアドレス</label>
+        <input type="email" id="login-email-page" ng-model="email" class="form-control email" ng-disabled="done" ng-required="true">
     </div>
-</div>
-
-<div class="container" style="margin-bottom:2em;">
-    <div id="content">
-        <div class="container" ng-controller="Signup">
-            <!-- Login form -->
-            <form name="loginForm" class="form-login form-wrapper form-narrow">
-                <h3 class="title-divider"><span>サインアップ（ユーザー登録）</span></h3>
-                <div class="form-group">
-                    <label for="login-email-page">メールアドレス</label>
-                    <input type="email" id="login-email-page" ng-model="email" class="form-control email" ng-disabled="done" ng-required="true">
-                </div>
-                <div ng-show="!done">
-                    <span class="text-danger" ng-show="error">{{ error }}<br></span>
-                    <button ng-click="signup()" ng-disabled="!loginForm.$valid" class="btn btn-primary">登録する</button>
-                </div>
-                <p ng-show="done">上記メールアドレスに登録確認メールが送信されました。メールの指示に従って登録作業を進めてください。(このページはもう閉じても構いません)</p>
-            </form>
-        </div>
+    <div ng-show="!done">
+        <span class="text-danger" ng-show="error">{{ error }}<br></span>
+        <button ng-click="signup()" ng-disabled="!loginForm.$valid" class="btn btn-primary">登録する</button> <a href="#/login">(登録済みの方はこちらからログイン)</a>
     </div>
-</div>
-<!-- FOOTER -->
-<footer id="footer">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <p>Copyright 2014 &copy; Walbrix Corporation</p>
-            </div>
-            <div class="col-md-6">
-                <ul class="list-inline footer-menu">
-                    <!--
-                        <li><a href="#">Terms</a></li>
-                        <li><a href="#">Privacy</a></li>
-                    -->
-                    <li><a href="http://www.walbrix.com/jp/contact.html">お問い合わせ</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</footer>
-</body>
-</html>
+    <p ng-show="done">上記メールアドレスに登録確認メールが送信されました。メールの指示に従って登録作業を進めてください。(このページはもう閉じても構いません)</p>
+</form>

@@ -1,8 +1,7 @@
 package com.wbport.admin
 
-import com.walbrix.spring.EmailSupport
-import com.walbrix.spring.scalikejdbc.ScalikeJdbcSupport
-import com.wbport.DAO
+import com.walbrix.spring.{VelocitySupport, ScalikeJdbcSupport, EmailSupport}
+import com.wbport.{Result, DAO}
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.{RequestBody, ResponseBody, RequestMethod, RequestMapping}
@@ -25,40 +24,31 @@ case class BulkMail(
   recipients:Seq[Recipient]
 )
 
-case class Result(success:Boolean, info:Option[Any] = None)
-
 @Controller
 @Transactional
 @RequestMapping(Array(""))
-class RequestHandler extends ScalikeJdbcSupport with EmailSupport with DAO {
+class RequestHandler extends ScalikeJdbcSupport with EmailSupport with DAO with VelocitySupport {
   val defaultDumpFile = "/tmp/wbport-dump.sql"
 
   @RequestMapping(value=Array("dump"), method = Array(RequestMethod.POST))
   @ResponseBody
-  def dump(@RequestBody json:Map[String,AnyRef]):(Boolean, Option[String]) = {
+  def dump(@RequestBody json:Map[String,AnyRef]):Result[Nothing] = {
     val dumpFile = json.get("file").getOrElse(defaultDumpFile)
-    val rst = db(implicit session=>sql"script to ${dumpFile}".execute().apply())
-    (rst, None)
+    val rst = apply(sql"script to ${dumpFile}".execute())
+    Result(rst)
   }
 
   @RequestMapping(value=Array("dump"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def dump():(Boolean, Option[String]) = {
+  def dump():Result[Nothing] = {
     val dumpFile = defaultDumpFile
-    val rst = db(implicit session=>sql"script to ${dumpFile}".execute().apply())
-    (rst, None)
-  }
-
-  private def applyVariables(template:String, variables:Map[String,String]):String = {
-    "\\$[a-zA-Z0-9_]+".r.replaceAllIn(template, { matched =>
-      val original = matched.group(0)
-      variables.get(original).getOrElse("\\" + original)
-    })
+    val rst = apply(sql"script to ${dumpFile}".execute())
+    Result(rst)
   }
 
   @RequestMapping(value=Array("bulk-mail"), method=Array(RequestMethod.POST))
   @ResponseBody
-  def bulkMail(@RequestBody json:BulkMail):Result = {
+  def bulkMail(@RequestBody json:BulkMail):Result[Map[String,Int]] = {
     val sender = createMailSender()
     var success = 0
     var fail = 0
@@ -70,9 +60,9 @@ class RequestHandler extends ScalikeJdbcSupport with EmailSupport with DAO {
       }
       message.setTo(recipient.email)
       val variables = recipient.variables.getOrElse(Map())
-      val subject = applyVariables(json.subject, variables)
+      val subject = evaluate(json.subject, variables)
       message.setSubject(subject)
-      message.setText(applyVariables(json.body, variables))
+      message.setText(evaluate(json.body, variables))
       try {
         sender.send(message)
         createMailLog(recipient.email, Some(subject), true)
@@ -85,7 +75,7 @@ class RequestHandler extends ScalikeJdbcSupport with EmailSupport with DAO {
       }
     }
 
-    Result(true, Some(Map("success"->success, "fail"->fail)))
+    Result(fail == 0, Some(Map("success"->success, "fail"->fail)))
   }
 
 }

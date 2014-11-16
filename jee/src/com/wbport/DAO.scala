@@ -2,12 +2,12 @@ package com.wbport
 
 import java.security.MessageDigest
 import java.sql.SQLException
-
-import com.walbrix.spring.scalikejdbc.ScalikeJdbcSupport
+import com.walbrix.spring.ScalikeJdbcSupport
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Component
 import scalikejdbc.{WrappedResultSet, _}
 
-case class User(id:Int, email:String, admin:Boolean)
+case class User(id:Int, email:String, admin:Boolean, passwordPresent:Boolean)
 case class Server(id:Int, fqdn:String)
 case class Domain(domain:String)
 
@@ -16,32 +16,30 @@ case class Domain(domain:String)
  */
 @Component
 trait DAO extends ScalikeJdbcSupport {
-  private def row2user(row:WrappedResultSet):User = {
-    User(row.int("id"),row.string("email"), row.boolean("admin_user"))
+
+  def getUser[A](sql:SQL[A, NoExtractor]):Option[User] = {
+    single(sql.map { row =>
+      User(row.int("id"),row.string("email"), row.boolean("admin_user"), row.stringOpt("password").nonEmpty)
+    })
   }
 
-  def getUser(userId:Int):Option[User] = {
-    db(implicit session => sql"select * from users where id=${userId}".map(row2user(_)).single().apply())
-  }
+  def getUser(userId:Int):Option[User] =
+    getUser(sql"select * from users where id=${userId}")
 
-  def getUser(username:String):Option[User] = {
-    db(implicit session => sql"select * from users where email=${username}".map(row2user(_)).single().apply())
-  }
+  def getUser(username:String):Option[User] =
+    getUser(sql"select * from users where email=${username}")
 
-  def getUserHasPassword(username:String):Option[User] = {
-    db(implicit session => sql"select * from users where email=${username} and password is not null".map(row2user(_)).single().apply())
-  }
+  def getUserHasPassword(username:String):Option[User] =
+    getUser(sql"select * from users where email=${username} and password is not null")
 
-  def getUserByAuthToken(authToken:String):Option[User] = {
-    db(implicit session => sql"select * from users where auth_token=${authToken}".map(row2user(_)).single().apply())
-  }
+  def getUserByAuthToken(authToken:String):Option[User] =
+    getUser(sql"select * from users where auth_token=${authToken}")
 
-  def getUserHasNoPasswordByAuthToken(authToken:String):Option[User] = {
-    db(implicit session => sql"select * from users where auth_token=${authToken} and password is null".map(row2user(_)).single().apply())
-  }
+  def getUserHasNoPasswordByAuthToken(authToken:String):Option[User] =
+    getUser(sql"select * from users where auth_token=${authToken} and password is null")
 
   def checkPassword(username:String,password:String):Option[(Int,String,Boolean)] = {
-    val (userId,encrypted, authToken,admin) = db(implicit session => sql"select id,password,auth_token,admin_user from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3),row.boolean(4))).single().apply()).getOrElse(return None)
+    val (userId,encrypted, authToken,admin) = single(sql"select id,password,auth_token,admin_user from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3),row.boolean(4)))).getOrElse(return None)
     comparePassword(encrypted, password) match {
       case true => Some((userId,authToken,admin))
       case false => None
@@ -70,48 +68,41 @@ trait DAO extends ScalikeJdbcSupport {
     "%s$%s".format(salt, getSha256("%s%s".format(salt, password)))
   }
 
-  def generateAuthToken(email:String):String = {
+  def generateAuthToken(email:String):String =
     "%s%s".format(getSha256(email), new scala.util.Random(new java.security.SecureRandom()).alphanumeric.take(16).mkString)
-  }
 
   def resetAuthToken(userId:Int):Option[String] = {
-    db(implicit session=>sql"select email from users where id=${userId}".map(_.string(1)).single().apply()).map { email =>
+    string(sql"select email from users where id=${userId}").map { email =>
       val authToken = generateAuthToken(email)
-      db(implicit session=>sql"update users set auth_token=${authToken},auth_token_expires_at=DATEADD('MONTH', 6, now()) where id=${userId}".update().apply())
+      update(sql"update users set auth_token=${authToken},auth_token_expires_at=DATEADD('MONTH', 6, now()) where id=${userId}")
       authToken
     }
   }
 
-  def row2server(row:WrappedResultSet):Server = {
-    Server(row.int("id"),row.string("fqdn"))
-  }
-
-  def getServers(userId:Int):Seq[Server] = {
-    db(implicit session=>sql"select * from servers where user_id=${userId}".map(row2server(_)).list().apply())
-  }
+  def getServers(userId:Int):Seq[Server] =
+    list(sql"select * from servers where user_id=${userId}".map(row=>Server(row.int("id"),row.string("fqdn"))))
 
   def createServer(userId:Int, fqdn:String):Option[Int] = {
     try {
-      db { implicit session =>
-        sql"insert into servers(fqdn,user_id) values(${fqdn},${userId})".update().apply()
-        sql"select last_insert_id()".map(_.int(1)).single().apply()
-      }
+      update(sql"insert into servers(fqdn,user_id) values(${fqdn},${userId})")
+      int(sql"select last_insert_id()")
     }
     catch {
-      case e:SQLException if e.getErrorCode == 23505/*DUPLICATE_KEY_1*/ =>
-        None
+      case e:DuplicateKeyException => None
     }
   }
 
-  def deleteServer(userId:Int, fqdn:String):Boolean = {
-    db(implicit session=>sql"delete from servers where user_id=${userId} and fqdn=${fqdn}".update().apply()) > 0
-  }
+  def deleteServer(userId:Int, fqdn:String):Boolean =
+    update(sql"delete from servers where user_id=${userId} and fqdn=${fqdn}") > 0
 
-  def getDomains(userId:Int):Seq[String] = {
-    db(implicit session=>sql"select * from domains where user_id=${userId}".map(_.string("domain_name")).list().apply())
-  }
+  def getDomains(userId:Int):Seq[String] =
+    list(sql"select * from domains where user_id=${userId}".map(_.string("domain_name")))
 
-  def createMailLog(recipient:String, subject:Option[String] = None, success:Boolean = true, errorMessage:Option[String] = None):Unit = db { implicit session =>
-    sql"insert into mail_log(recipient,subject,success,error_message) values(${recipient},${subject},${success},${errorMessage})".update().apply()
-  }
+  def createMailLog(recipient:String, subject:Option[String] = None, success:Boolean = true, errorMessage:Option[String] = None):Unit =
+    update(sql"insert into mail_log(recipient,subject,success,error_message) values(${recipient},${subject},${success},${errorMessage})")
+
+  def getSystemConfig(configKey:String):Option[String] =
+    string(sql"select config_value from system_config where config_key=${configKey}")
+
+  def getSystemEmailFrom():String = getSystemConfig("system_email_from").getOrElse("support@wbport.com")
 }

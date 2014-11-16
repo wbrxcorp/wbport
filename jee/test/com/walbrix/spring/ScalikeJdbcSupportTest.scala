@@ -1,7 +1,5 @@
-package com.wbport
+package com.walbrix.spring
 
-import java.security.MessageDigest
-import com.walbrix.spring.ScalikeJdbcSupport
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.test.context.ContextConfiguration
@@ -10,11 +8,13 @@ import org.springframework.transaction.annotation.Transactional
 import scalikejdbc._
 
 /**
- * Created by shimarin on 14/11/12.
+ * Created by shimarin on 14/11/16.
  */
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("context.xml"))
+@ContextConfiguration
 @Transactional
-class AuthenticationTest extends AnyRef with ScalikeJdbcSupport {
-
+class ScalikeJdbcSupportTest extends ScalikeJdbcSupport {
+  @Test def testExecute():Unit = {
+    assert(execute(sql"select 1"))
+  }
 }

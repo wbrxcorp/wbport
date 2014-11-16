@@ -3,21 +3,32 @@ angular.module("WbPort", ["ngResource","ngSanitize","ui.bootstrap"])
 .config(["$locationProvider", function($locationProvider) {
     $locationProvider.html5Mode(true);
 }])
-.controller("Login", ["$scope", "$resource", "$window", function($scope, $resource, $window) {
-    var login = $resource("./api/login");
-    $scope.login = function() {
-        login.save({}, {email:$scope.email,password:$scope.password}, function(result) {
-            if (result.success) {
-                $window.location.reload();
-            } else {
-                $scope.error = result.info ? result.info : "メールアドレス又はパスワードが正しくありません";
-            }
+.controller("BasicInfo", ["$scope", "$resource", "$modal", function($scope, $resource, $modal) {
+    var info = $resource("./api/info");
+    var password = $resource("./api/password");
+    $scope.info = info.get();
+    $scope.changePassword = function() {
+        $modal.open({
+            templateUrl:"password.html",scope:$scope
+        }).result.then(function (result) {
+            var modalInstance = $modal.open({
+                templateUrl:"progress.html",
+                backdrop:"static",keyboard:false
+            });
+            password.save(result, function(result) {
+                modalInstance.close();
+                if (result.success) {
+                    $scope.message = "password changed.";
+                    $scope.info = info.get(); // info refresh
+                } else {
+                    $scope.message = result.info;
+                }
+            }, function() {
+                modalInstance.close();
+                $scope.message = "comm failed";
+            });
         });
     }
-}])
-.controller("BasicInfo", ["$scope", "$resource", function($scope, $resource) {
-    var info = $resource("./api/info");
-    $scope.info = info.get();
 }])
 .controller("Server", ["$scope", "$resource", function($scope, $resource) {
     var server = $resource("./api/server/:fqdn")
@@ -56,28 +67,6 @@ angular.module("WbPort", ["ngResource","ngSanitize","ui.bootstrap"])
                 $scope.servers = server.query();
             }
         });
-    }
-}])
-.controller("Signup", ["$scope", "$resource","$window", function($scope, $resource,$window) {
-    var signup = $resource("./api/signup");
-    $scope.signup = function() {
-        signup.save({}, {email:$scope.email,password:$scope.password}, function(result) {
-            if (result.success) {
-                $scope.done = true;
-            } else {
-                $scope.error = result.info;
-            }
-        });
-    }
-}])
-.controller("Confirm", ["$scope", "$resource","$location","$window", function($scope, $resource,$location,$window) {
-    var confirm = $resource("./api/confirm/:auth_token")
-    var auth_token = $location.search()["k"];
-    $scope.info = confirm.get({auth_token:auth_token});
-    $scope.confirm = function() {
-        confirm.save({auth_token:auth_token}, {}, function() {
-            $window.location = "./";
-        })
     }
 }])
 .run(["$rootScope", "$resource", "$window", function($scope, $resource, $window) {

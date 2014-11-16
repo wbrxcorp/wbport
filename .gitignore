@@ -4,4 +4,5 @@ workspace.xml
 build
 out
 settings-*.xml
+*.log
 

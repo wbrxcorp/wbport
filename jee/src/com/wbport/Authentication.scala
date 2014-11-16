@@ -2,6 +2,7 @@ package com.wbport
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse, Cookie, HttpSession}
 
+import com.walbrix.spring.HttpContextSupport
 import com.walbrix.spring.mvc.HttpErrorStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.context.request.{ServletRequestAttributes, RequestContextHolder}
@@ -9,22 +10,19 @@ import org.springframework.web.context.request.{ServletRequestAttributes, Reques
 /**
  * Created by shimarin on 14/11/14.
  */
-trait Authentication extends DAO with HttpErrorStatus {
+trait Authentication extends DAO with HttpErrorStatus with HttpContextSupport {
   val authTokenCookieName = "auth_token"
   val userIdSessionAttrKey = "user_id"
   val userRequestAttrKey = "user"
 
-  @Autowired private var request:HttpServletRequest = _
-  @Autowired private var response:HttpServletResponse = _
-
   private def sendCredentials(userId:Int, authToken:String, admin:Boolean):Unit = {
-    val session = request.getSession()
+    val session = getSession()
     session.invalidate()
     val cookie: Cookie = new Cookie(authTokenCookieName, authToken)
     cookie.setPath("/")
     cookie.setMaxAge(60*60*24*180)
-    response.addCookie(cookie)
-    val newSession = request.getSession()
+    addCookie(cookie)
+    val newSession = getSession()
     newSession.setAttribute(userIdSessionAttrKey, userId)
   }
 
@@ -44,28 +42,28 @@ trait Authentication extends DAO with HttpErrorStatus {
 
   def logout():Boolean = {
     resetAuthToken(getUser().id)
-    request.getSession().invalidate()
+    getSession().invalidate()
     true
   }
 
   def getAuthToken():Option[String] = {
-    Option(request.getCookies).flatMap(_.find(_.getName.equals(authTokenCookieName)).map(_.getValue))
+    Option(getCookies).flatMap(_.find(_.getName.equals(authTokenCookieName)).map(_.getValue))
   }
 
   def getUserOpt():Option[User] = {
-    Option(request.getAttribute(userRequestAttrKey).asInstanceOf[User]).foreach { user =>
+    Option(getAttribute(userRequestAttrKey).asInstanceOf[User]).foreach { user =>
       return Some(user)
     }
-    val session = request.getSession()
+    val session = getSession()
     Option(session.getAttribute(userIdSessionAttrKey).asInstanceOf[Integer]).foreach { userId =>
       getUser(userId).foreach { user =>
-        request.setAttribute(userRequestAttrKey, user)
+        setAttribute(userRequestAttrKey, user)
         return Some(user)
       }
     }
     getAuthToken.foreach { authToken =>
       getUserByAuthToken(authToken).foreach { user =>
-        request.setAttribute(userRequestAttrKey, user)
+        setAttribute(userRequestAttrKey, user)
         session.setAttribute(userIdSessionAttrKey, user.id  )
         return Some(user)
       }

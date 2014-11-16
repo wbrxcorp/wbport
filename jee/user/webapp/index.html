@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.css">
-    <link rel="stylesheet" href="./css/style.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-resource.js"></script>
@@ -55,7 +54,9 @@
                 </div>
                 <div class="panel-body" ng-controller="BasicInfo">
                     <p>メールアドレス: {{info.email}}<br>料金プラン: 先行テストユーザー(無料)</p>
-                    <button ng-disabled="true" class="btn btn-primary">パスワード変更</button>
+                    <button class="btn btn-primary" ng-click="changePassword()">パスワード変更</button>
+                    <p ng-show="info.$resolved && !info.passwordPresent" class="text-danger">パスワードが未設定です。すぐに設定してください！</p>
+                    <p ng-show="message" class="text-danger">{{message}}</p>
                 </div>
             </div>
         </div>
@@ -103,7 +104,7 @@
         </div>
         <div class="panel-body">
             <p>設定・接続に関するお問い合せや、この画面から行えない設定変更のご依頼などは下記にご連絡ください。</p>
-            email: <a href="mailto:support@walbrix.net">support@walbrix.net</a> (ワルブリックス株式会社 サポート担当)<br>
+            email: <a href="mailto:support@wbport.com">support@wbport.com</a> (ワルブリックス株式会社 サポート担当)<br>
             Facebookメッセージ: <a href="http://www.facebook.com/messages/wbrxcorp">ワルブリックス株式会社</a><br>
             お電話: 050-3159-5792 (ワルブリックス株式会社 サポート担当)
         </div>
@@ -116,10 +117,10 @@
         <div class="panel-body">
             <tabset>
                 <tab heading="Walbrixの場合">
-                    <img src="/static/img/user/walbrix01.png" width="320">
-                    <img src="/static/img/user/walbrix02.png">
-                    <img src="/static/img/user/walbrix03.png">
-                    <img src="/static/img/user/walbrix04.png">
+                    <img class="img-responsive" src="./img/walbrix01.png">
+                    <img class="img-responsive" src="./img/walbrix02.png">
+                    <img class="img-responsive" src="./img/walbrix03.png">
+                    <img class="img-responsive" src="./img/walbrix04.png">
                 </tab>
                 <tab heading="OpenVPNを直接設定する場合">
                     <h5>/etc/openvpn/openvpn.conf</h5>
@@ -149,7 +150,7 @@ PaSsWorD</pre>
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <p>Copyright 2014 &copy; Walbrix Corporation</p>
+                <p>Copyright 2014 &copy; <a href="http://www.walbrix.com/jp/">Walbrix Corporation</a></p>
             </div>
             <div class="col-md-6">
                 <ul class="list-inline footer-menu">

@@ -1,6 +1,7 @@
 import java.awt.Desktop
 import java.util.concurrent.TimeUnit
 
+import org.apache.log4j.PropertyConfigurator
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.server.handler.HandlerList
@@ -36,6 +37,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     System.setProperty("spring.profiles.default", "dev")
     System.setProperty("java.util.logging.config.file", "logging.properties")
+    PropertyConfigurator.configure("log4j.properties")
     val (server, port) = run()
 
     System.setProperty("webdriver.chrome.driver", System.getProperty("os.name") match {

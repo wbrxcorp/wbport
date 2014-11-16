@@ -28,5 +28,6 @@
     <orderEntry type="library" scope="PROVIDED" name="javax.mail:mail:1.4.7" level="project" />
     <orderEntry type="library" name="org.seleniumhq.selenium:selenium-support:2.43.1" level="project" />
     <orderEntry type="library" name="org.seleniumhq.selenium:selenium-chrome-driver:2.43.1" level="project" />
+    <orderEntry type="library" name="org.apache.velocity:velocity:1.7" level="project" />
   </component>
 </module>

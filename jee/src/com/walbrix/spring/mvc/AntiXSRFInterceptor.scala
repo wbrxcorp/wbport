@@ -10,7 +10,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
  * Created by shimarin on 14/11/03.
  */
 class AntiXSRFInterceptor extends HandlerInterceptorAdapter {
-  @Autowired private var servletContext:ServletContext = _
   private var methodsToBeProtected:Array[String] = Array("POST","DELETE","PUT")
   private var tokenCookieName:String = "XSRF-TOKEN"
   private var tokenHeaderName:String = "X-XSRF-TOKEN"
@@ -43,7 +42,7 @@ class AntiXSRFInterceptor extends HandlerInterceptorAdapter {
       }.getOrElse(false)
       if (!cookieExists) {
         val cookie: Cookie = new Cookie(tokenCookieName, sessionId)
-        cookie.setPath(servletContext.getContextPath() match {
+        cookie.setPath(request.getContextPath match {
           case "" | "/" | null => "/"
           case contextPath => contextPath
         })

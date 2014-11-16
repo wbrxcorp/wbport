@@ -1,6 +1,6 @@
 package com.wbport.api
 
-import com.walbrix.spring.scalikejdbc.ScalikeJdbcSupport
+import com.walbrix.spring.ScalikeJdbcSupport
 import com.wbport.DAO
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +17,7 @@ class RequestHandler extends ScalikeJdbcSupport with DAO {
   @RequestMapping(value=Array("vpn-auth"), method = Array(RequestMethod.GET))
   @ResponseBody
   def vpnAuth(@RequestParam fqdn:String, @RequestParam password:String):(Boolean, Option[String]) = {
-    val rst = db(implicit session=>sql"select password from users,servers where servers.user_id=users.id and fqdn=${fqdn}".map(_.string(1)).single().apply()).map { encrypted =>
+    val rst = string(sql"select password from users,servers where servers.user_id=users.id and fqdn=${fqdn}").map { encrypted =>
       comparePassword(encrypted, password)
     }.getOrElse(false)
     (rst, None)
