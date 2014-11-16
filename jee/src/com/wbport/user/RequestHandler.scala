@@ -131,8 +131,8 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
       if (!json.password.map(checkPassword(user.email, _) != None).getOrElse(false))
         return Result.fail("INVALIDPASSWORD")
     }
-    update(sql"delete from domains where user_id=${user.id}")
     update(sql"delete from servers where user_id=${user.id}")
+    update(sql"delete from domains where user_id=${user.id}")
     update(sql"delete from users where id=${user.id}")  match {
       case rst if rst > 0 =>
         logout()
