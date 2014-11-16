@@ -1,7 +1,7 @@
 WBPORT.com へのご登録ありがとうございます。
 下記リンクをクリックして登録を完了させてください。
 
-$context_url/guest.jsp/#confirm/$auth_token
+$context_url/guest.jsp#/confirm/$auth_token
 
 登録完了後はすぐにパスワードを設定願います。
 設定したパスワードは、WBPORT.comへのログインの他、お客様のWebサーバを
@@ -10,7 +10,7 @@ WBPORT.comのサーバとVPN接続するためにも使用されます。
 ご不明な点がありましたらこのメールへの返信にてご質問ください。
 
 このメールは
-$context_url/guest.jsp/#signup
+$context_url/guest.jsp#/signup
 から送信されています。お心当たりのない場合はどなたかがメールアドレスの
 入力を間違えたことが考えられますので、お手数ですが本メールを削除願います。
 
