@@ -84,7 +84,7 @@ trait DAO extends ScalikeJdbcSupport {
 
   def createServer(userId:Int, fqdn:String):Option[Int] = {
     try {
-      update(sql"insert into servers(fqdn,user_id) values(${fqdn},${userId})")
+      update(sql"insert into servers(fqdn,user_id) values(${fqdn.toLowerCase},${userId})")
       int(sql"select last_insert_id()")
     }
     catch {
