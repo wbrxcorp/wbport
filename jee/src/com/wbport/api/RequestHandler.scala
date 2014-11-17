@@ -18,7 +18,7 @@ class RequestHandler extends ScalikeJdbcSupport with DAO {
   @ResponseBody
   def vpnAuth(@RequestParam fqdn:String, @RequestParam password:String):(Boolean, Option[String]) = {
     val rst = string(sql"select password from users,servers where servers.user_id=users.id and fqdn=${fqdn}").map { encrypted =>
-      comparePassword(encrypted, password)
+      com.walbrix.comparePassword(encrypted, password)
     }.getOrElse(false)
     (rst, None)
   }

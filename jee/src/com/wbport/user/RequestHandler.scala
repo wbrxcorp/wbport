@@ -43,7 +43,7 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
     getUserHasPassword(email) match {
       case Some(user) => Result.fail("ALREADYEXISTS")
       case None =>
-        val authToken = generateAuthToken(email)
+        val authToken = com.walbrix.generateAuthToken(email)
         val rst = apply(sql"merge into users(email,auth_token,auth_token_expires_at) key(email) values(${email},${authToken},DATEADD('DAY', 1, now()))".update())
         if (rst < 1) return Result.fail
         val sender = createMailSender()
@@ -112,7 +112,7 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
       if (!json.password.map(checkPassword(user.email, _) != None).getOrElse(false))
         return Result.fail("INVALIDPASSWORD")
     }
-    update(sql"update users set password=${encryptPassword(json.newPassword)} where id=${user.id}") match {
+    update(sql"update users set password=${com.walbrix.encryptPassword(json.newPassword)} where id=${user.id}") match {
       case rst if rst > 0 =>
         loginWithFreshAuthToken(user.id)
         Result.success

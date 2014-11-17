@@ -40,40 +40,15 @@ trait DAO extends ScalikeJdbcSupport {
 
   def checkPassword(username:String,password:String):Option[(Int,String,Boolean)] = {
     val (userId,encrypted, authToken,admin) = single(sql"select id,password,auth_token,admin_user from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3),row.boolean(4)))).getOrElse(return None)
-    comparePassword(encrypted, password) match {
+    com.walbrix.comparePassword(encrypted, password) match {
       case true => Some((userId,authToken,admin))
       case false => None
     }
   }
 
-  private def getSha256(str:String):String = {
-    val buf = new StringBuffer()
-    val md = MessageDigest.getInstance("SHA-256")
-    md.update(str.getBytes())
-    md.digest().foreach { b =>
-      buf.append("%02x".format(b))
-    }
-    buf.toString
-  }
-
-  def comparePassword(encrypted:String, password:String):Boolean = {
-    encrypted.split('$') match {
-      case x if x.length == 2 => x(1) == getSha256("%s%s".format(x(0), password))
-      case _ => false
-    }
-  }
-
-  def encryptPassword(password:String):String = {
-    val salt = new scala.util.Random(new java.security.SecureRandom()).alphanumeric.take(5).mkString
-    "%s$%s".format(salt, getSha256("%s%s".format(salt, password)))
-  }
-
-  def generateAuthToken(email:String):String =
-    "%s%s".format(getSha256(email), new scala.util.Random(new java.security.SecureRandom()).alphanumeric.take(16).mkString)
-
   def resetAuthToken(userId:Int):Option[String] = {
     string(sql"select email from users where id=${userId}").map { email =>
-      val authToken = generateAuthToken(email)
+      val authToken = com.walbrix.generateAuthToken(email)
       update(sql"update users set auth_token=${authToken},auth_token_expires_at=DATEADD('MONTH', 6, now()) where id=${userId}")
       authToken
     }
