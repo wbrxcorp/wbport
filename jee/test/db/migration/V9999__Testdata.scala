@@ -8,7 +8,7 @@ import scalikejdbc._
 class V9999__Testdata extends ScalikeJdbcMigration {
   override def migrate(implicit session: DBSession): Unit = {
     val email = "user@example.com"
-    val password = "0PiNI$e243e97898f551b4cf056358201bd50b8fe87c89884ee93814bde5e29b3c2d81"
+    val password = com.walbrix.encryptPassword("secret")
     sql"""insert into users(email,password,auth_token,auth_token_expires_at,admin_user)
        values(${email}, ${password}, 'AUTHTOKEN', DATEADD('YEAR', 1, now()), true)""".update().apply()
     val userId = sql"select last_insert_id()".map(_.int(1)).single().apply().get

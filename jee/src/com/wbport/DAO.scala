@@ -38,10 +38,10 @@ trait DAO extends ScalikeJdbcSupport {
   def getUserHasNoPasswordByAuthToken(authToken:String):Option[User] =
     getUser(sql"select * from users where auth_token=${authToken} and password is null")
 
-  def checkPassword(username:String,password:String):Option[(Int,String,Boolean)] = {
-    val (userId,encrypted, authToken,admin) = single(sql"select id,password,auth_token,admin_user from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3),row.boolean(4)))).getOrElse(return None)
+  def checkPassword(username:String,password:String):Option[(Int,String)] = {
+    val (userId,encrypted, authToken) = single(sql"select id,password,auth_token from users where email=${username}".map(row=>(row.int(1),row.string(2),row.string(3)))).getOrElse(return None)
     com.walbrix.comparePassword(encrypted, password) match {
-      case true => Some((userId,authToken,admin))
+      case true => Some((userId,authToken))
       case false => None
     }
   }

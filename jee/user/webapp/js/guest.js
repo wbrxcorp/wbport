@@ -9,7 +9,7 @@ angular.module("WbPortGuest", ["ngResource","ngRoute","ui.bootstrap"])
 .controller("Login", ["$scope", "$resource", "$window", function($scope, $resource, $window) {
     var login = $resource("./api/login");
     $scope.login = function() {
-        login.save({}, {email:$scope.email,password:$scope.password}, function(result) {
+        login.save({}, {username:$scope.email,password:$scope.password}, function(result) {
             if (result.success) {
                 $window.location = "./";
             } else {

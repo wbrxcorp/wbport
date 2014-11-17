@@ -1,5 +1,6 @@
 package com.wbport.user
 
+import com.walbrix.spring.mvc.{CRUDWithAuthentication, LoginRequestHandler}
 import com.walbrix.spring.{HttpContextSupport, VelocitySupport, EmailSupport}
 import com.wbport._
 import org.springframework.stereotype.Controller
@@ -17,7 +18,7 @@ case class Quit(password:Option[String])
 @Controller
 @Transactional
 @RequestMapping(Array(""))
-class RequestHandler extends DAO with Authentication with EmailSupport with VelocitySupport with HttpContextSupport {
+class RequestHandler extends DAO with Authentication with EmailSupport with VelocitySupport with HttpContextSupport with LoginRequestHandler[User,Int] {
   implicit def boolean2result(success:Boolean):Result[Nothing] = Result(success)
 
   @RequestMapping(value=Array("info"), method = Array(RequestMethod.GET))
@@ -27,14 +28,6 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
       Map("email"->user.email, "passwordPresent"->user.passwordPresent)
     }.getOrElse(Map("email"->None))
   }
-
-  @RequestMapping(value=Array("login"), method = Array(RequestMethod.POST),consumes=Array("application/json"))
-  @ResponseBody
-  def login(@RequestBody auth:Auth):Result[Nothing] = login(auth.email, auth.password)
-
-  @RequestMapping(value=Array("logout"), method = Array(RequestMethod.POST))
-  @ResponseBody
-  def logout_():Result[Nothing] = logout()
 
   @RequestMapping(value=Array("signup"), method = Array(RequestMethod.POST),consumes=Array("application/json"))
   @ResponseBody
@@ -137,4 +130,39 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
       case _ => Result.fail("DELETEFAIL")
     }
   }
+}
+
+@Controller
+@Transactional
+@RequestMapping(Array("serverCRUD"))
+class CRUDRequestHandler extends CRUDWithAuthentication[Server, Int, User, Int] with Authentication {
+  override def create(entity: Server, user: User): Option[Int] = {
+    update(sql"insert into servers(fqdn,user_id) values(${entity.fqdn},${user.id}})") match {
+      case x if x > 0 => int(sql"select last_insert_id")
+      case _ => None
+    }
+  }
+
+  override def update(id: Int, entity: Server, user: User): Boolean = {
+    update(sql"update servers set fqdn=${entity.fqdn} where id=${id} and user_id=${user.id}") > 0
+  }
+
+  override def get(offset: Int, limit: Int, ordering: Option[String], user: User): (Int, Seq[Server]) = {
+    val servers = list(sql"select * from servers where user_id=${user.id} order by id limit ${limit} offset ${offset}".map { row=>
+      Server(id=row.int("id"),fqdn=row.string("fqdn"))
+    })
+    val count = int(sql"select count(*) from servers where user_id=${user.id}").get
+    (count, servers)
+  }
+
+  override def get(id: Int, user: User): Option[Server] = {
+    single(sql"select * from servers where user_id=${user.id} and id=${id}".map { row =>
+      Server(id=row.int("id"),fqdn=row.string("fqdn"))
+    })
+  }
+
+  override def delete(id: Int, user: User): Boolean =
+    update(sql"delete from servers where user_id=${user.id} and id=${id}") > 0
+
+  override def toIdType(id: String):Int = id.toInt
 }
