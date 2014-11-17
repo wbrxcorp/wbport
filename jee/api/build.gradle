@@ -7,11 +7,19 @@ repositories {
     mavenCentral()
 }
 
-version = '0.20141114'
+version = '0.20141117'
 
 sourceSets {
-    main.scala.srcDirs = ['../src']
-    main.resources.srcDirs = main.scala.srcDirs
+    main {
+        scala {
+            srcDirs = ['../src']
+            exclude 'com/walbrix/**'
+        }
+        resources {
+            srcDirs = main.scala.srcDirs
+            exclude '**/*.scala'
+        }
+    }
 }
 
 sourceCompatibility = 1.7
@@ -22,18 +30,18 @@ webAppDirName = 'webapp'
 
 dependencies {
     compile 'org.scala-lang:scala-library:2.11.3'
+    compile 'org.scalikejdbc:scalikejdbc_2.11:2.1.2'
     compile 'org.springframework:spring-webmvc:4.1.1.RELEASE'
-    compile 'org.springframework:spring-tx:4.1.1.RELEASE'
     compile 'org.springframework:spring-jdbc:4.1.1.RELEASE'
     compile 'org.springframework:spring-context-support:4.1.1.RELEASE'
-    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.11:2.4.2'
-    compile 'org.scalikejdbc:scalikejdbc_2.11:2.1.2'
-    compile 'org.flywaydb:flyway-core:3.0'
     compile 'org.apache.velocity:velocity:1.7'
+    compile files('../build/libs/wbrxcorp-spring-scala-0.20141117.jar')
 
     providedCompile 'javax.servlet:servlet-api:2.5'
     providedCompile 'javax.mail:mail:1.4.7'
 
     runtime 'org.springframework:spring-aop:4.1.1.RELEASE'
+    runtime 'org.springframework:spring-tx:4.1.1.RELEASE'
     runtime 'org.aspectj:aspectjweaver:1.8.2'
+    runtime 'com.fasterxml.jackson.module:jackson-module-scala_2.11:2.4.2'
 }

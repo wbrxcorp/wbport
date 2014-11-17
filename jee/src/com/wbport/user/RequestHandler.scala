@@ -2,11 +2,8 @@ package com.wbport.user
 
 import com.walbrix.spring.{HttpContextSupport, VelocitySupport, EmailSupport}
 import com.wbport._
-import org.apache.velocity.app.VelocityEngine
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.ui.velocity.VelocityEngineUtils
 import org.springframework.web.bind.annotation._
 import scalikejdbc._
 
