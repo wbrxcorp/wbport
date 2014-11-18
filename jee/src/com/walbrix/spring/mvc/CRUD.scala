@@ -11,18 +11,30 @@ abstract trait CRUD[T,TID] extends HttpErrorStatus {
   def defaultLimit() = 20
   def toIdType(id:String):TID
 
+  class Entity(map:Map[String,AnyRef]) {
+    def apply(name:String):AnyRef = map(name)
+    def get(name:String):Option[AnyRef] = map.get(name)
+
+    def int(name:String):Int = intOpt(name).get
+    def intOpt(name:String):Option[Int] = map.get(name).map(_.asInstanceOf[Int])
+    def string(name:String):String = stringOpt(name).get
+    def stringOpt(name:String):Option[String] = map.get(name).map(_.asInstanceOf[String])
+    def boolean(name:String):Boolean = booleanOpt(name).get
+    def booleanOpt(name:String):Option[Boolean] = map.get(name).map(_.asInstanceOf[Boolean])
+  }
+
   @RequestMapping(value=Array(""), method=Array(RequestMethod.POST), consumes=Array("application/json"))
   @ResponseBody
-  def _create(@RequestBody entity:T):Result[TID] =
-    create(entity).map(Success(_)).getOrElse(Fail())
+  def _create(@RequestBody entity:Map[String,AnyRef]):Result[TID] =
+    create(new Entity(entity)).map(Success(_)).getOrElse(Fail())
 
-  def create(entity:T):Option[TID]
+  def create(entity:Entity):Option[TID]
 
   @RequestMapping(value=Array(""), method=Array(RequestMethod.GET))
   @ResponseBody
   def _get(@RequestParam(value="offset",defaultValue="0") offset:Int,
            @RequestParam(value="limit",required=false) _limit:java.lang.Integer,
-            @RequestParam(value="ordering",required=false) ordering:String):Page[T] = {
+           @RequestParam(value="ordering",required=false) ordering:String):Page[T] = {
     val limit = if (_limit == null) defaultLimit() else _limit.toInt
     val rst = get(offset, limit, Option(ordering))
     Page(rst._1, offset, limit, rst._2)
@@ -40,19 +52,20 @@ abstract trait CRUD[T,TID] extends HttpErrorStatus {
 
   @RequestMapping(value=Array("{id}"), method=Array(RequestMethod.POST), consumes=Array("application/json"))
   @ResponseBody
-  def _update(@PathVariable("id") id:String, @RequestBody entity:T):Result[String] = {
+  def _update(@PathVariable("id") id:String, @RequestBody entity:Map[String,AnyRef]):T = {
+    val properId = toIdType(id)
     (try {
-      update(toIdType(id),entity)
+      update(properId,new Entity(entity))
     }
     catch  {
-      case e:Exception => return Fail(e.getMessage)
+      case e:Exception => raiseBadRequest
     }) match {
-      case true => Success()
+      case true => get(properId).getOrElse(raiseNotFound)
       case false => raiseNotFound
     }
   }
 
-  def update(id:TID, entity:T):Boolean
+  def update(id:TID, entity:Entity):Boolean
 
   @RequestMapping(value=Array("{id}"), method=Array(RequestMethod.DELETE))
   @ResponseBody
@@ -71,11 +84,11 @@ abstract trait CRUD[T,TID] extends HttpErrorStatus {
 }
 
 trait CRUDWithAuthentication[T,TID,U,UID] extends CRUD[T,TID] with Authentication[U,UID] {
-  override def create(entity: T): Option[TID] = create(entity, getUser())
-  def create(entity:T, user:U):Option[TID]
+  override def create(entity: Entity): Option[TID] = create(entity, getUser())
+  def create(entity:Entity, user:U):Option[TID]
 
-  override def update(id: TID, entity: T): Boolean = update(id, entity, getUser())
-  def update(id:TID, entity:T, user:U):Boolean
+  override def update(id: TID, entity: Entity): Boolean = update(id, entity, getUser())
+  def update(id:TID, entity:Entity, user:U):Boolean
 
   override def get(offset: Int, limit: Int, ordering: Option[String]): (Int, Seq[T]) = get(offset, limit, ordering, getUser())
   def get(offset: Int, limit: Int, ordering: Option[String], user:U):(Int, Seq[T])

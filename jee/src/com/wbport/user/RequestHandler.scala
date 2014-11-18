@@ -146,15 +146,15 @@ class RequestHandler extends LogDAO with SystemConfig with EmailSupport with Vel
 @Transactional
 @RequestMapping(Array("serverCRUD"))
 class CRUDRequestHandler extends CRUDWithAuthentication[Server, Int, User, Int] with Authentication {
-  override def create(entity: Server, user: User): Option[Int] = {
-    update(sql"insert into servers(fqdn,user_id) values(${entity.fqdn.toLowerCase()},${user.id}})") match {
+  override def create(entity: Entity, user: User): Option[Int] = {
+    update(sql"insert into servers(fqdn,user_id) values(${entity.string("fqdn")},${user.id}})") match {
       case x if x > 0 => int(sql"select last_insert_id")
       case _ => None
     }
   }
 
-  override def update(id: Int, entity: Server, user: User): Boolean = {
-    update(sql"update servers set fqdn=${entity.fqdn} where id=${id} and user_id=${user.id}") > 0
+  override def update(id: Int, entity: Entity, user: User): Boolean = {
+    update(sql"update servers set fqdn=${entity.string("fqdn")} where id=${id} and user_id=${user.id}") > 0
   }
 
   override def get(offset: Int, limit: Int, ordering: Option[String], user: User): (Int, Seq[Server]) = {
