@@ -1,7 +1,6 @@
 package com.wbport.api
 
 import com.walbrix.spring.ScalikeJdbcSupport
-import com.wbport.DAO
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.{RequestParam, ResponseBody, RequestMethod, RequestMapping}
@@ -13,7 +12,7 @@ import scalikejdbc._
 @Controller
 @Transactional
 @RequestMapping(Array(""))
-class RequestHandler extends ScalikeJdbcSupport with DAO {
+class RequestHandler extends ScalikeJdbcSupport {
   @RequestMapping(value=Array("vpn-auth"), method = Array(RequestMethod.GET))
   @ResponseBody
   def vpnAuth(@RequestParam fqdn:String, @RequestParam password:String):(Boolean, Option[String]) = {

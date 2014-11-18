@@ -12,9 +12,5 @@ import org.springframework.transaction.annotation.Transactional
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("context.xml"))
 @Transactional
-class DAOTest extends DAO {
-  @Test def testCreateServer():Unit = {
-    createServer(1, "hogehoge.wbport.com")
-    assert(createServer(1, "hogehoge.wbport.com") == None)
-  }
+class UserDAOTest extends UserDAO {
 }

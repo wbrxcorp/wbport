@@ -1,8 +1,10 @@
 package com.wbport.user
 
-import com.walbrix.spring.mvc.{CRUDWithAuthentication, LoginRequestHandler}
-import com.walbrix.spring.{HttpContextSupport, VelocitySupport, EmailSupport}
+import com.walbrix.spring.mvc._
+import com.walbrix.spring.{VelocitySupport, EmailSupport}
+import com.wbport.Authentication
 import com.wbport._
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation._
@@ -18,7 +20,7 @@ case class Quit(password:Option[String])
 @Controller
 @Transactional
 @RequestMapping(Array(""))
-class RequestHandler extends DAO with Authentication with EmailSupport with VelocitySupport with HttpContextSupport with LoginRequestHandler[User,Int] {
+class RequestHandler extends LogDAO with SystemConfig with EmailSupport with VelocitySupport with LoginRequestHandler[User,Int] with Authentication {
   implicit def boolean2result(success:Boolean):Result[Nothing] = Result(success)
 
   @RequestMapping(value=Array("info"), method = Array(RequestMethod.GET))
@@ -34,11 +36,11 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
   def signup(@RequestBody json:Map[String,AnyRef]):Result[String] = {
     val email = json("email").asInstanceOf[String]
     getUserHasPassword(email) match {
-      case Some(user) => Result.fail("ALREADYEXISTS")
+      case Some(user) => Fail("ALREADYEXISTS")
       case None =>
         val authToken = com.walbrix.generateAuthToken(email)
         val rst = apply(sql"merge into users(email,auth_token,auth_token_expires_at) key(email) values(${email},${authToken},DATEADD('DAY', 1, now()))".update())
-        if (rst < 1) return Result.fail
+        if (rst < 1) return Fail()
         val sender = createMailSender()
         val message = sender.createJisMailMessage
         message.setFrom(getSystemEmailFrom())
@@ -51,12 +53,12 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
         try {
           sender.send(message)
           createMailLog(email, Some(subject), true)
-          Result.success
+          Success()
         }
         catch {
           case e:Exception =>
             createMailLog(email, Some(subject), false, Some(e.getMessage))
-            Result.fail("MAILSENDFAIL")
+            Fail("MAILSENDFAIL")
         }
     }
   }
@@ -80,22 +82,31 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
 
   @RequestMapping(value=Array("server"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def server():Seq[Server] = getServers(getUser().id)
+  def server():Seq[Server] =
+    list(sql"select * from servers where user_id=${getUser().id}".map(row=>Server(row.int("id"),row.string("fqdn"))))
 
   @RequestMapping(value=Array("server"), method = Array(RequestMethod.POST),consumes=Array("application/json"))
   @ResponseBody
   def server(@RequestBody json:Map[String,AnyRef]):Result[String] = {
-    val rst = createServer(getUser().id, json("fqdn").asInstanceOf[String])
+    val rst = try {
+      update(sql"insert into servers(fqdn,user_id) values(${json("fqdn").asInstanceOf[String].toLowerCase},${getUser().id})")
+      int(sql"select last_insert_id()")
+    }
+    catch {
+      case e:DuplicateKeyException => None
+    }
     Result(rst != None, rst match { case None => Some("ALREADYEXISTS") case _ => None} )
   }
 
   @RequestMapping(value=Array("server/{fqdn:.+}"), method = Array(RequestMethod.DELETE))
   @ResponseBody
-  def deleteServer(@PathVariable fqdn:String):Result[Nothing] = deleteServer(getUser().id, fqdn)
+  def deleteServer(@PathVariable fqdn:String):Result[Nothing] =
+    update(sql"delete from servers where user_id=${getUser().id} and fqdn=${fqdn}") > 0
 
   @RequestMapping(value=Array("domain"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def domain():Seq[String] = getDomains(getUser().id)
+  def domain():Seq[String] =
+    list(sql"select * from domains where user_id=${getUser().id}".map(_.string("domain_name")))
 
   @RequestMapping(value=Array("password"), method = Array(RequestMethod.POST))
   @ResponseBody
@@ -103,13 +114,13 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
     val user = getUser()
     if (user.passwordPresent) {
       if (!json.password.map(checkPassword(user.email, _) != None).getOrElse(false))
-        return Result.fail("INVALIDPASSWORD")
+        return Fail("INVALIDPASSWORD")
     }
     update(sql"update users set password=${com.walbrix.encryptPassword(json.newPassword)} where id=${user.id}") match {
       case rst if rst > 0 =>
         loginWithFreshAuthToken(user.id)
-        Result.success
-      case _ => Result.fail("UPDATEFAIL")
+        Success()
+      case _ => Fail("UPDATEFAIL")
     }
   }
 
@@ -119,15 +130,15 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
     val user = getUser()
     if (user.passwordPresent) {
       if (!json.password.map(checkPassword(user.email, _) != None).getOrElse(false))
-        return Result.fail("INVALIDPASSWORD")
+        return Fail("INVALIDPASSWORD")
     }
     update(sql"delete from servers where user_id=${user.id}")
     update(sql"delete from domains where user_id=${user.id}")
     update(sql"delete from users where id=${user.id}")  match {
       case rst if rst > 0 =>
         logout()
-        Result.success
-      case _ => Result.fail("DELETEFAIL")
+        Success()
+      case _ => Fail("DELETEFAIL")
     }
   }
 }
@@ -137,7 +148,7 @@ class RequestHandler extends DAO with Authentication with EmailSupport with Velo
 @RequestMapping(Array("serverCRUD"))
 class CRUDRequestHandler extends CRUDWithAuthentication[Server, Int, User, Int] with Authentication {
   override def create(entity: Server, user: User): Option[Int] = {
-    update(sql"insert into servers(fqdn,user_id) values(${entity.fqdn},${user.id}})") match {
+    update(sql"insert into servers(fqdn,user_id) values(${entity.fqdn.toLowerCase()},${user.id}})") match {
       case x if x > 0 => int(sql"select last_insert_id")
       case _ => None
     }

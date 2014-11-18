@@ -1,7 +1,8 @@
 package com.wbport.admin
 
+import com.walbrix.spring.mvc.Result
 import com.walbrix.spring.{VelocitySupport, ScalikeJdbcSupport, EmailSupport}
-import com.wbport.{Result, DAO}
+import com.wbport.LogDAO
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.{RequestBody, ResponseBody, RequestMethod, RequestMapping}
@@ -27,7 +28,7 @@ case class BulkMail(
 @Controller
 @Transactional
 @RequestMapping(Array(""))
-class RequestHandler extends ScalikeJdbcSupport with EmailSupport with DAO with VelocitySupport {
+class RequestHandler extends ScalikeJdbcSupport with EmailSupport with LogDAO with VelocitySupport {
   val defaultDumpFile = "/tmp/wbport-dump.sql"
 
   @RequestMapping(value=Array("dump"), method = Array(RequestMethod.POST))
