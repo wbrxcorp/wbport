@@ -1,8 +1,5 @@
 package com.wbport
 
-import com.walbrix.spring.ScalikeJdbcSupport
-import scalikejdbc._
-
 /**
  * Created by shimarin on 14/11/14.
  */

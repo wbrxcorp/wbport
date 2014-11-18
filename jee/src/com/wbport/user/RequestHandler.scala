@@ -8,7 +8,6 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation._
-import scalikejdbc._
 
 case class Auth(email:String,password:String)
 case class ChangePassword(password:Option[String],newPassword:String)

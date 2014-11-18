@@ -25,7 +25,7 @@ class TransactionAwareDBSession(private val dataSource:DataSource,
   }
 }
 
-trait ScalikeJdbcSupport {
+trait ScalikeJdbcSupport extends SQLInterpolation {
   private var dataSource:DataSource = _
   private var exceptionTranslator:SQLExceptionTranslator = _
 

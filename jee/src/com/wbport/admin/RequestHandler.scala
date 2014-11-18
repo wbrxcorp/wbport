@@ -6,7 +6,6 @@ import com.wbport.LogDAO
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.{RequestBody, ResponseBody, RequestMethod, RequestMapping}
-import scalikejdbc._
 
 /**
  * Created by shimarin on 14/11/14.

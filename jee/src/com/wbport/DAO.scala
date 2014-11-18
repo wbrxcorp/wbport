@@ -1,12 +1,7 @@
 package com.wbport
 
-import java.security.MessageDigest
-import java.sql.SQLException
 import com.walbrix.spring.ScalikeJdbcSupport
-import com.walbrix.spring.mvc.CRUD
-import org.springframework.dao.DuplicateKeyException
-import org.springframework.stereotype.Component
-import scalikejdbc.{WrappedResultSet, _}
+import scalikejdbc.{NoExtractor, SQL}
 
 case class User(id:Int, email:String, admin:Boolean, passwordPresent:Boolean)
 case class Server(id:Int, fqdn:String)
