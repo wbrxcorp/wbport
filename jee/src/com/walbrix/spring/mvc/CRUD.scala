@@ -1,5 +1,6 @@
 package com.walbrix.spring.mvc
 
+import org.joda.time.DateTime
 import org.springframework.web.bind.annotation._
 
 /**
@@ -12,15 +13,23 @@ abstract trait CRUD[T,TID] extends HttpErrorStatus {
   def toIdType(id:String):TID
 
   class Entity(map:Map[String,AnyRef]) {
-    def apply(name:String):AnyRef = map(name)
+    private def missing(name:String):String = "Missing request property '%s'".format(name)
+
+    def apply(name:String):AnyRef = map.get(name).getOrElse(raiseBadRequest(missing(name)))
     def get(name:String):Option[AnyRef] = map.get(name)
 
-    def int(name:String):Int = intOpt(name).get
+    def int(name:String):Int = intOpt(name).getOrElse(raiseBadRequest(missing(name)))
     def intOpt(name:String):Option[Int] = map.get(name).map(_.asInstanceOf[Int])
-    def string(name:String):String = stringOpt(name).get
+    def string(name:String):String = stringOpt(name).getOrElse(raiseBadRequest(missing(name)))
     def stringOpt(name:String):Option[String] = map.get(name).map(_.asInstanceOf[String])
-    def boolean(name:String):Boolean = booleanOpt(name).get
+    def boolean(name:String):Boolean = booleanOpt(name).getOrElse(raiseBadRequest(missing(name)))
     def booleanOpt(name:String):Option[Boolean] = map.get(name).map(_.asInstanceOf[Boolean])
+    def jodaDateTime(name:String):DateTime = jodaDateTimeOpt(name).getOrElse(raiseBadRequest(missing(name)))
+    def jodaDateTimeOpt(name:String):Option[DateTime] = map.get(name) match {
+      case None | Some(null) => None
+      case Some(null) => Some(null)
+      case Some(x) => new Some(new DateTime(x))
+    }
   }
 
   @RequestMapping(value=Array(""), method=Array(RequestMethod.POST), consumes=Array("application/json"))

@@ -3,6 +3,7 @@ package com.walbrix.spring.mvc
 import javax.servlet.http.Cookie
 
 import com.walbrix.spring.HttpContextSupport
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.{RequestBody, ResponseBody, RequestMethod, RequestMapping}
 
 /**
@@ -92,6 +93,13 @@ abstract class AuthenticationBean[U,UID] extends Authentication[U,UID] {
 case class Auth(username:String, password:String)
 
 trait LoginRequestHandler[U,UID] extends Authentication[U,UID] {
+  @RequestMapping(value=Array("login"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  @Transactional
+  def login_():Map[String,AnyRef] = {
+    Map("current_user"->getUserOpt())
+  }
+
   @RequestMapping(value=Array("login"), method = Array(RequestMethod.POST),consumes=Array("application/json"))
   @ResponseBody
   def login(@RequestBody auth:Auth):Result[Nothing] = Result(login(auth.username, auth.password))
