@@ -13,7 +13,7 @@ class DBSession(con:Connection) extends scalikejdbc.DBSession {
   override val conn:Connection = con
 }
 
-trait ScalikeJdbcMigration extends JdbcMigration {
+trait ScalikeJdbcMigration extends JdbcMigration with scalikejdbc.SQLInterpolation {
   override def migrate(con:Connection):Unit = {
     migrate(new DBSession(con))
   }

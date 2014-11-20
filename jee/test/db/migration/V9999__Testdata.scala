@@ -1,7 +1,6 @@
 package db.migration
 
 import com.walbrix.flyway.{DBSession, ScalikeJdbcMigration}
-import scalikejdbc._
 /**
  * Created by shimarin on 14/11/12.
  */
