@@ -51,7 +51,7 @@ abstract trait CRUD[T,TID] extends HttpErrorStatus {
 
   def get(offset:Int, limit:Int, ordering:Option[String] = None):(Int, Seq[T])
 
-  @RequestMapping(value=Array("{id}"), method=Array(RequestMethod.GET))
+  @RequestMapping(value=Array("{id:.+}"), method=Array(RequestMethod.GET))
   @ResponseBody
   def _get(@PathVariable(value="id") id:String):T = {
     get(toIdType(id)).getOrElse(raiseNotFound)
@@ -59,7 +59,7 @@ abstract trait CRUD[T,TID] extends HttpErrorStatus {
 
   def get(id:TID):Option[T]
 
-  @RequestMapping(value=Array("{id}"), method=Array(RequestMethod.POST), consumes=Array("application/json"))
+  @RequestMapping(value=Array("{id:.+}"), method=Array(RequestMethod.POST), consumes=Array("application/json"))
   @ResponseBody
   def _update(@PathVariable("id") id:String, @RequestBody entity:Map[String,AnyRef]):T = {
     val properId = toIdType(id)
@@ -76,7 +76,7 @@ abstract trait CRUD[T,TID] extends HttpErrorStatus {
 
   def update(id:TID, entity:Entity):Boolean
 
-  @RequestMapping(value=Array("{id}"), method=Array(RequestMethod.DELETE))
+  @RequestMapping(value=Array("{id:.+}"), method=Array(RequestMethod.DELETE))
   @ResponseBody
   def _delete(@PathVariable("id") id:String):Result[String] = {
     (try {
