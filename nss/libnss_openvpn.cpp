@@ -1,6 +1,6 @@
 /*
  * g++ -lboost_system -lboost_iostreams -lboost_regex -lpthread -fPIC -g -shared -Wl,-soname,libnss_openvpn.so.2 -o /lib/libnss_openvpn.so.2 libnss_openvpn.cpp
- * debian run deps: apt-get install libboost-system1.42.0 libboost-regex1.42.0
+ * debian run deps: apt-get install libboost-system1.49.0 libboost-regex1.49.0
 */
 
 #include <string.h>
