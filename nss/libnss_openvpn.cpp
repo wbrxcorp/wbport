@@ -1,7 +1,7 @@
 /*
  * g++ -lboost_system -lboost_iostreams -lboost_regex -lpthread -fPIC -g -shared -Wl,-soname,libnss_openvpn.so.2 -o /lib/libnss_openvpn.so.2 libnss_openvpn.cpp
  * debian run deps: apt-get install libboost-system1.49.0 libboost-regex1.49.0
- * build deps: apt-get install apt-get install libboost-all-dev
+ * build deps: apt-get install libboost-all-dev
 */
 
 #include <string.h>
@@ -35,6 +35,7 @@ static uint32_t lookup(const std::string& hostname)
 		std::vector<std::string> splitted;
 		boost::algorithm::split(splitted, line, boost::is_any_of("\t"));
 		if (splitted[0] == "CLIENT_LIST" && splitted[1] != "UNDEF") {
+			boost::algorithm::to_lower(splitted[1]);
 			clients[splitted[1]] = splitted[3];
 			rev[splitted[3]] = splitted[1];
 		}
@@ -43,6 +44,7 @@ static uint32_t lookup(const std::string& hostname)
 	s.flush();
 
 	std::string hn = boost::regex_replace(std::string(hostname), boost::regex("\\.wbport$"), std::string(""));
+	boost::algorithm::to_lower(hn);
 	std::map<std::string,std::string>::iterator  it = clients.find(hn);
 	if (it == clients.end()) {
 		throw NSS_STATUS_NOTFOUND;
@@ -193,4 +195,3 @@ enum nss_status _nss_openvpn_gethostbyname_r(
 
 }
 } // extern "C"
-
