@@ -1,8 +1,8 @@
 scalaVersion := "2.11.7"
+name := "playground"
 version := "0.20160308"
 
-//fork in run := true
-//connectInput in run := true
+enablePlugins(JettyPlugin)
 
 libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.11.7"
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.1"
@@ -35,3 +35,11 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+
+lazy val root = (project in file(".")).
+  enablePlugins(BuildInfoPlugin).
+  settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion) //,
+    //buildInfoPackage := "buildinfo"
+  )
+

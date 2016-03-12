@@ -7,7 +7,7 @@ object Main extends App {
   }
 
   // main
-  val factory = new profiles.Factory(args.toSeq.headOption.getOrElse("default"))
+  val factory = new profiles.Factory(args.toSeq.headOption.getOrElse(buildinfo.BuildInfo.name))
 
   val modulesToLoad = factory.getObjectByName("ImportModule").asInstanceOf[profiles.ImportModule].modules
   val modulesLoaded = scala.collection.mutable.Set[modules.Module]()
