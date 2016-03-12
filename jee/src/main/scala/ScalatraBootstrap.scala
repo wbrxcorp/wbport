@@ -28,5 +28,6 @@ class ScalatraBootstrap extends org.scalatra.LifeCycle {
   override def init(context: javax.servlet.ServletContext) {
     initDatabase
     //context.mount(classOf[some.Class], "/some/path/*")
+    //context.initParameters(org.scalatra.EnvironmentKey) = "production"
   }
 }
