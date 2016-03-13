@@ -1,0 +1,21 @@
+<html>
+<head>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.2.4/ui-bootstrap-tpls.js"></script>
+  <script>
+    angular.module("Playground", ["ui.bootstrap"])
+    .run(["$rootScope",  function($scope) {
+    }]);
+    angular.element(document).ready(function() {
+      angular.bootstrap(document, ['Playground']);
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    {{1+1}}
+    <a href="/h2/">h2</a>
+  </div>
+</body>
+</html>
