@@ -9,7 +9,6 @@ libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.1"
 libraryDependencies += "org.flywaydb" % "flyway-core" % "3.2.1"
 libraryDependencies += "com.h2database" % "h2" % "1.4.191"
 libraryDependencies += "org.scalikejdbc" % "scalikejdbc_2.11" % "2.3.5"
-libraryDependencies += "org.jsoup" % "jsoup" % "1.8.3"
 libraryDependencies += "commons-io" % "commons-io" % "2.4"
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.38"
 libraryDependencies += "joda-time" % "joda-time" % "2.9.2"
@@ -18,6 +17,13 @@ libraryDependencies += "org.scalatra" % "scalatra_2.11" % "2.4.0"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.5"
 libraryDependencies += "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2"
 libraryDependencies += "org.slf4j" % "jcl-over-slf4j" % "1.7.16"
+
+libraryDependencies += "org.jsoup" % "jsoup" % "1.8.3"
+libraryDependencies += "com.mashape.unirest" % "unirest-java" % "1.4.8"
+
+libraryDependencies ++= Seq(
+  "poi", "poi-ooxml"
+).map("org.apache.poi" % _ % "3.14")
 
 libraryDependencies ++= Seq(
   "jetty-webapp","jetty-plus"
@@ -42,4 +48,3 @@ lazy val root = (project in file(".")).
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion) //,
     //buildInfoPackage := "buildinfo"
   )
-
