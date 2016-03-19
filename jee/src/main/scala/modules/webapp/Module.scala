@@ -8,6 +8,8 @@ object Module extends modules.Module {
   override def init(factory:profiles.Factory,repl:scala.tools.nsc.interpreter.ILoop):Unit = {
     val webAppDefinition = factory.getObjectByName("WebAppDefinition").asInstanceOf[WebAppDefinition]
 
+    webAppDefinition.preInit
+
     val docRoot = webAppDefinition.docRoot
     if (docRoot.exists(!new java.io.File(_).isDirectory)) return
 
