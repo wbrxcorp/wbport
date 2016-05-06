@@ -10,7 +10,7 @@ libraryDependencies += "org.flywaydb" % "flyway-core" % "4.0"
 libraryDependencies += "com.h2database" % "h2" % "1.4.191"
 libraryDependencies += "org.scalikejdbc" % "scalikejdbc_2.11" % "2.3.5"
 libraryDependencies += "commons-io" % "commons-io" % "2.4"
-libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.38"
+libraryDependencies += "mysql" % "mysql-connector-java" % "6.0.2"
 libraryDependencies += "joda-time" % "joda-time" % "2.9.3"
 libraryDependencies += "org.scalatra" % "scalatra_2.11" % "2.4.0"
 
@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "jetty-webapp","jetty-plus"
-).map("org.eclipse.jetty" % _ % "9.2.15.v20160210")
+).map("org.eclipse.jetty" % _ % "9.2.16.v20160414")
 
 assemblyMergeStrategy in assembly := {
   case PathList("javax", "servlet", xs @ _*)         => MergeStrategy.first
