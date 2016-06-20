@@ -20,3 +20,17 @@ git push -u origin master
 git fetch upstream
 git merge upstream/master
 ```
+
+## 起動
+
+jee/ 以下で sbt run すると REPLに入る。また、同時にWebインターフェイスも起動する。
+
+## プロファイル
+
+scalaパッケージ profiles 以下に各プロファイル名のサブパッケージがあり、起動時にコマンドライン引数で指定できる。省略時はsbtのプロジェクト名が採用される。プロジェクト名のプロファイルが存在しない場合は default が使用される。
+
+## モジュール
+
+scalaパッケージ modules以下に各モジュール名のサブパッケージがあり、直下のModuleオブジェクトがモジュール本体として扱われる。どのモジュールが読み込まれるかはプロファイルの ImportModule#modulesで決定される。
+
+モジュールのinitにはREPL環境のの参照が渡されるので、ここでおせっかいなimportやimplicitの宣言をしておいたりする。
