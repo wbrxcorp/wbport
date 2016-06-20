@@ -34,3 +34,7 @@ scalaパッケージ profiles 以下に各プロファイル名のサブパッ�
 scalaパッケージ modules以下に各モジュール名のサブパッケージがあり、直下のModuleオブジェクトがモジュール本体として扱われる。どのモジュールが読み込まれるかはプロファイルの ImportModule#modulesで決定される。
 
 モジュールのinitにはREPL環境のの参照が渡されるので、ここでおせっかいなimportやimplicitの宣言をしておいたりする。
+
+### databaseモジュール
+
+プロファイルの DataSourceDefinition オブジェクトで指定されたデータベースへのアクセスを提供する。scalikejdbcの  sqlリテラルをREPL上から直接使用可能にする。AutoSessionが有効なのでDB接続への参照を取り回さなくて良い
