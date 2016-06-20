@@ -23,7 +23,7 @@ git merge upstream/master
 
 ## 起動
 
-jee/ 以下で sbt run すると REPLに入る。また、同時にWebインターフェイスも起動する。
+jee/ 以下で sbt run すると REPLに入る。また、同時にWebインターフェイスも起動する。REPLを抜けるには :quit とする。ターミナルがおかしくなっているので適宜resetすること。
 
 ## プロファイル
 
