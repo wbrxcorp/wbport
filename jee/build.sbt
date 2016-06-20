@@ -1,6 +1,6 @@
 scalaVersion := "2.11.8"
 name := "playground"
-version := "0.20160418"
+version := "0.20160621"
 
 enablePlugins(JettyPlugin)
 
