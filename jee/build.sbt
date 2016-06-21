@@ -10,7 +10,7 @@ libraryDependencies += "org.flywaydb" % "flyway-core" % "4.0.3"
 libraryDependencies += "com.h2database" % "h2" % "1.4.192"
 libraryDependencies += "org.scalikejdbc" % "scalikejdbc_2.11" % "2.4.2"
 libraryDependencies += "commons-io" % "commons-io" % "2.5"
-libraryDependencies += "mysql" % "mysql-connector-java" % "6.0.2"
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.39"
 libraryDependencies += "joda-time" % "joda-time" % "2.9.4"
 libraryDependencies += "org.scalatra" % "scalatra_2.11" % "2.4.1"
 
