@@ -11,7 +11,7 @@ create table system_config (
     config_key varchar(64) not null primary key,
     config_value text not null,
     created_at timestamp not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp
+    updated_at datetime
 );
 
 insert into system_config (config_key, config_value) values('confirm_email_subject','wbport.com 登録確認');

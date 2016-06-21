@@ -4,10 +4,10 @@ create table users (
     password varchar(128),
     nickname varchar(64),
     auth_token varchar(128) not null unique,
-    auth_token_expires_at timestamp not null,
+    auth_token_expires_at datetime not null,
     admin_user boolean not null default false,
     created_at timestamp not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp
+    updated_at datetime
 );
 
 create table servers (
