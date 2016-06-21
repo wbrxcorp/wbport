@@ -1,4 +1,4 @@
-package profiles.wbport.production
+package profiles.production
 
 object DataSourceDefinition extends modules.database.DataSourceDefinition {
   private val projectName = buildinfo.BuildInfo.name

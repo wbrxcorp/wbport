@@ -1,10 +1,10 @@
 package modules.wbport
 
 import java.security.MessageDigest
+import scalikejdbc.{DB,NamedDB}
 
 object Module extends modules.Module with scalikejdbc.SQLInterpolation {
   //override def init(factory:profiles.Factory,repl:scala.tools.nsc.interpreter.ILoop):Unit = {}
-
   override def dependsOn:Seq[String] = Seq("database")
 
   def getSha256(str:String):String = {

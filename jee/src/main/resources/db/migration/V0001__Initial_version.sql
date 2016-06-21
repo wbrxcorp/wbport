@@ -3,7 +3,7 @@ create table users (
     email varchar(64) not null unique,
     password varchar(128),
     nickname varchar(64),
-    auth_token varchar(256) not null unique,
+    auth_token varchar(128) not null unique,
     auth_token_expires_at timestamp not null,
     admin_user boolean not null default false,
     created_at timestamp not null default current_timestamp,
@@ -13,7 +13,7 @@ create table users (
 create table servers (
     id serial not null primary key,
     fqdn varchar(128) not null unique,
-    user_id int not null,
+    user_id bigint unsigned not null,
     foreign key(user_id) references users(id)
 );
 

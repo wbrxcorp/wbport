@@ -4,7 +4,7 @@ create table mail_log (
     subject text,
     success boolean not null,
     error_message text,
-    created_at timestamp not null default current_timestamp,
+    created_at timestamp not null default current_timestamp
 );
 
 create table system_config (
