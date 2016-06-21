@@ -1,11 +1,27 @@
-#!/usr/bin/python
-import sys,os,json,urllib,urllib2
+#!/usr/bin/python2.7
+import sys,os,hashlib
+import MySQLdb
 
-username = os.environ.get("username")
-password = os.environ.get("password")
+DB_HOST="localhost"
+DB_NAME="wbport"
+DB_USER="wbport"
+DB_PASSWORD=""
 
-params = {'fqdn':username,'password':password}
+def mkhash(password, salt):
+    return hashlib.sha256("%s%s" % (salt, password) ).hexdigest()
 
-rst = json.load(urllib2.urlopen("http://localhost:8080/api/vpn-auth?%s" % urllib.urlencode(params)))
+def check_password(cur, username, password):
+    cur.execute("select password from users,servers where users.id=servers.user_id and fqdn=%s", (username,))
+    row = cur.fetchone()
+    if row is None: return False
+    #else
+    (salt,hash) = row[0].split('$')
+    return hash == mkhash(password, salt)
 
-sys.exit(0 if rst[0] else 1)
+conn = MySQLdb.connect(host=DB_HOST,db=DB_NAME,user=DB_USER,passwd=DB_PASSWORD)
+cur = conn.cursor()
+success = check_password(cur, os.environ.get("username"), os.environ.get("password"))
+cur.close()
+conn.close()
+
+sys.exit(0 if success else 1)
